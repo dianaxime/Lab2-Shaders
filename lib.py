@@ -9,6 +9,7 @@
 from utils import *
 from obj import Obj
 import random
+import math
 
 '''
     ****************************************
@@ -152,7 +153,7 @@ class Render(object):
                 for x in range(xi, xf + 1):
                     self.point(x, y, selectColor)
 
-    def triangle(self, A, B, C, selectColor = None):
+    def triangle(self, A, B, C, selectColor):
         xMin, xMax, yMin, yMax = bbox(A, B, C)
         for x in range(xMin, xMax + 1):
             for y in range(yMin, yMax + 1):
@@ -162,16 +163,10 @@ class Render(object):
                     continue
                 
                 z = A.z * w + B.z * u + C.z * v
-                
+
                 try:
                     if z > self.zbuffer[x][y]:
                         self.point(x, y, selectColor)
-                        '''
-                            Para z's Color Map
-                            z = round(z % 255)
-                            zColor = color(z, z, z)
-                            self.point(x, y, zColor)
-                        '''
                         self.zbuffer[x][y] = z
                 except:
                     pass
@@ -179,7 +174,7 @@ class Render(object):
     def load(self, filename, translate, scale):
         model = Obj(filename)
 
-        light = V3(0, 0, 1)
+        light = V3(-0.3, 0.7, 0.8)
         
         for face in model.faces:
             vcount = len(face)
@@ -211,13 +206,11 @@ class Render(object):
 
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
-                grey = round(255 * intensity)
-                if grey < 0:
-                    # Ignorar esta cara
-                    continue
-                intensityColor = color(0, 0, grey)
-            
-                self.triangle(A, B, C, intensityColor)
+
+                actualColor = self.shaders(A, intensity)
+
+                self.triangle(A, B, C, actualColor)
+                
 
             else:
                 f1 = face[0][0] - 1
@@ -253,15 +246,14 @@ class Render(object):
 
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
-                grey = round(255 * intensity)
-                if grey < 0:
-                    # Ignorar esta cara
-                    continue
-                intensityColor = color(0, 0, grey)
-                
-                self.triangle(A, B, C, intensityColor)
 
-                self.triangle(A, D, C, intensityColor)
+                actualColor = self.shaders(A, intensity)
+                
+                self.triangle(A, B, C, actualColor)
+
+                actualColor = self.shaders(C, intensity)
+
+                self.triangle(A, D, C, actualColor)
 
     def write(self, filename='out.bmp'):
         f = open(filename, 'bw')
@@ -291,3 +283,66 @@ class Render(object):
                 f.write(self.framebuffer[x][y])
 
         f.close()
+
+    '''
+    def shaders1(self, x, y, z, intensity):
+        grey = random.randint(120, 150)
+        d = random.randint(0, 50)
+        0 = random.randint(115, 210)
+        0 = random.randint(90, 165)
+        if x > 400 + d and x < 600 - d and y >= 720 + d and y < 800 - d:
+            selectColor = color(208, 215, 224)
+            zColor = color(208, 215, 224)
+        elif x > 450 + d and x < 600 - d and y >= 650 and y < 700 + d:
+            selectColor = color(grey, grey, 100)
+        elif x > 375 + d and x < 675 - d and y >= 500 - d and y < 650 + d:
+            selectColor = color(0, 150, 0)
+        elif x > 475 + d and x < 600 - d and y >= 450 - d and y < 500 + d:
+            selectColor = color(0, 120, 0)
+            zColor = color(0, 120, 0)
+        elif x > 490 + d and x < 510 - d and y >= 400 and y < 450:
+            selectColor = color(0, 100, 0)
+            zColor = color(0, 100, 0)
+        elif x > 530 + d and x < 590 - d and y >= 350 and y < 450:
+            selectColor = color(0, grey, 0)
+        elif x > 550 + d and x < 580 - d and y >= 200 - d and y < 350:
+            selectColor = color(0, grey, 0)
+        else:
+            grey = round(255 * intensity)
+            if grey < 0:
+                grey = 0
+            elif grey > 255:
+                grey = 255
+            z = round(z % 255)
+            selectColor = color(0, 0, grey)
+            zColor = color(0, 0, z)
+            
+        return x, y, selectColor, zColor
+    '''
+
+    def shaders(self, A, intensity):
+        d = random.randint(0, 50)
+        grey = random.randint(120, 150)
+        if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
+            selectColor = color(208, 215, 224)
+        elif A.x > 450 + d and A.x < 600 - d and A.y >= 650 and A.y < 700 + d:
+            selectColor = color(grey, grey, 100)
+        elif A.x > 375 + d and A.x < 675 - d and A.y >= 500 - d and A.y < 650 + d:
+            selectColor = color(0, 150, 0)
+        elif A.x > 475 + d and A.x < 600 - d and A.y >= 450 - d and A.y < 500 + d:
+            selectColor = color(0, 120, 0)
+        elif A.x > 490 + d and A.x < 510 - d and A.y >= 400 and A.y < 450:
+            selectColor = color(0, 100, 0)
+        elif A.x > 530 + d and A.x < 590 and A.y >= 350 and A.y < 450:
+            selectColor = color(0, grey, 0)
+        elif A.x > 550 + d and A.x < 580 and A.y >= 200 and A.y < 350:
+            selectColor = color(0, grey, 0)
+        
+        else:
+            grey = round(255 * intensity)
+            if grey < 0:
+                grey = 0
+            elif grey > 255:
+                grey = 255
+            selectColor = color(0, 0, grey)
+        return selectColor
