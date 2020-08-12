@@ -25,6 +25,7 @@ class Render(object):
         self.framebuffer = []
         self.zbuffer = []
         self.color = WHITE
+        self.activeShader = 'TIERRA'
 
     def createWindow(self, width, height):
         self.width = width
@@ -231,7 +232,10 @@ class Render(object):
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
 
-                color1, color2, color3 = self.shaders(A, intensity)
+                if self.activeShader == 'TIERRA':
+                    color1, color2, color3 = self.shadersTierra(A, intensity)
+                else:
+                    color1, color2, color3 = self.shadersLuna(A, intensity)
 
                 self.triangle(A, B, C, color1, color2, color3)
                 
@@ -271,11 +275,18 @@ class Render(object):
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
 
-                color1, color2, color3 = self.shaders(A, intensity)
+
+                if self.activeShader == 'TIERRA':
+                    color1, color2, color3 = self.shadersTierra(A, intensity)
+                else:
+                    color1, color2, color3 = self.shadersLuna(A, intensity)
                 
                 self.triangle(A, B, C, color1, color2, color3)
 
-                color1, color2, color3 = self.shaders(C, intensity)
+                if self.activeShader == 'TIERRA':
+                    color1, color2, color3 = self.shadersTierra(A, intensity)
+                else:
+                    color1, color2, color3 = self.shadersLuna(A, intensity)
 
                 self.triangle(A, D, C, color1, color2, color3)
 
@@ -308,72 +319,7 @@ class Render(object):
 
         f.close()
 
-    '''
-    def shaders1(self, x, y, z, intensity):
-        grey = random.randint(120, 150)
-        d = random.randint(0, 50)
-        0 = random.randint(115, 210)
-        0 = random.randint(90, 165)
-        if x > 400 + d and x < 600 - d and y >= 720 + d and y < 800 - d:
-            selectColor = color(208, 215, 224)
-            zColor = color(208, 215, 224)
-        elif x > 450 + d and x < 600 - d and y >= 650 and y < 700 + d:
-            selectColor = color(grey, grey, 100)
-        elif x > 375 + d and x < 675 - d and y >= 500 - d and y < 650 + d:
-            selectColor = color(0, 150, 0)
-        elif x > 475 + d and x < 600 - d and y >= 450 - d and y < 500 + d:
-            selectColor = color(0, 120, 0)
-            zColor = color(0, 120, 0)
-        elif x > 490 + d and x < 510 - d and y >= 400 and y < 450:
-            selectColor = color(0, 100, 0)
-            zColor = color(0, 100, 0)
-        elif x > 530 + d and x < 590 - d and y >= 350 and y < 450:
-            selectColor = color(0, grey, 0)
-        elif x > 550 + d and x < 580 - d and y >= 200 - d and y < 350:
-            selectColor = color(0, grey, 0)
-        else:
-            grey = round(255 * intensity)
-            if grey < 0:
-                grey = 0
-            elif grey > 255:
-                grey = 255
-            z = round(z % 255)
-            selectColor = color(0, 0, grey)
-            zColor = color(0, 0, z)
-            
-        return x, y, selectColor, zColor
-    '''
-
-    '''
-    def shaders2(self, A, intensity):
-        d = random.randint(0, 50)
-        grey = random.randint(120, 150)
-        if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
-            selectColor = color(208, 215, 224)
-        elif A.x > 450 + d and A.x < 600 - d and A.y >= 650 and A.y < 700 + d:
-            selectColor = color(grey, grey, 100)
-        elif A.x > 375 + d and A.x < 675 - d and A.y >= 500 - d and A.y < 650 + d:
-            selectColor = color(0, 150, 0)
-        elif A.x > 475 + d and A.x < 600 - d and A.y >= 450 - d and A.y < 500 + d:
-            selectColor = color(0, 120, 0)
-        elif A.x > 490 + d and A.x < 510 - d and A.y >= 400 and A.y < 450:
-            selectColor = color(0, 100, 0)
-        elif A.x > 530 + d and A.x < 590 and A.y >= 350 and A.y < 450:
-            selectColor = color(0, grey, 0)
-        elif A.x > 550 + d and A.x < 580 and A.y >= 200 and A.y < 350:
-            selectColor = color(0, grey, 0)
-        
-        else:
-            grey = round(255 * intensity)
-            if grey < 0:
-                grey = 0
-            elif grey > 255:
-                grey = 255
-            selectColor = color(0, 0, grey)
-        return selectColor
-    '''
-
-    def shaders(self, A, intensity):
+    def shadersTierra(self, A, intensity):
         d = random.randint(0, 50)
         grey = random.randint(120, 150)
         if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
@@ -413,4 +359,28 @@ class Render(object):
             color1 = color(25, 27, 26)
             color2 = color(34, 59, 66)
             color3 = color(99, grey, 110)
+        return color1, color2, color3
+
+    def shadersLuna(self, A, intensity):
+        d = random.randint(0, 100)
+        if A.x > 100 + d and A.x < 600 - d and A.y >= 325 + d and A.y < 700 - d:
+            color1 = color(34, 72, 140)
+            color2 = color(34, 72, 140)
+            color3 = color(34, 72, 140)
+        elif A.x > 600 - d and A.x < 800 - d and A.y >= 600 - d and A.y < 800 - d:
+            color1 = color(34, 72, 140)
+            color2 = color(34, 72, 140)
+            color3 = color(34, 72, 140)
+        elif A.x > 100 + d and A.x < 800 - d and A.y >= 700 and A.y < 800:
+            color1 = color(72, 228, 210)
+            color2 = color(90, 227, 220)
+            color3 = color(103, 232, 230)
+        elif A.x > 100 and A.x < 800 and A.y >= 0 and A.y < 275 + d:
+            color1 = color(72, 228, 210)
+            color2 = color(90, 227, 220)
+            color3 = color(103, 232, 230)
+        else:
+            color1 = color(125, 195, 95)
+            color2 = color(125, 195, 95)
+            color3 = color(125, 195, 95)
         return color1, color2, color3

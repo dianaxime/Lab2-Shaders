@@ -73,5 +73,9 @@ def glFinish(filename='out.bmp'):
 glCreateWindow(1000, 1000)
 glClear()
 
+# bitmap.activeShader = 'TIERRA'
+bitmap.activeShader = 'LUNA'
 glLoad('./sphere.obj', V3(500, 500, 0), V3(500, 500, 200))
-glFinish('sphere1.bmp')
+# glFinish('tierra.bmp')
+glFinish('luna.bmp')
+
