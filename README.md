@@ -10,3 +10,14 @@ Curso de Gráficas por Computadora
 
 ![realidad](https://github.com/dianaxime/Lab2-Shaders/blob/master/sphere.bmp?raw=true)
 
+## Realidad 2.0
+
+![tierra](https://github.com/dianaxime/Lab2-Shaders/blob/master/tierra.bmp?raw=true)
+
+### Expectativa Lunar
+
+![expectativaluna](https://github.com/dianaxime/Lab2-Shaders/blob/master/luna.PNG?raw=true)
+
+### Realidad Lunar
+
+![luna](https://github.com/dianaxime/Lab2-Shaders/blob/master/luna.bmp?raw=true)
