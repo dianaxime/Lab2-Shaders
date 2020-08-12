@@ -153,7 +153,7 @@ class Render(object):
                 for x in range(xi, xf + 1):
                     self.point(x, y, selectColor)
 
-    def triangle(self, A, B, C, selectColor):
+    def triangle2(self, A, B, C, selectColor):
         xMin, xMax, yMin, yMax = bbox(A, B, C)
         for x in range(xMin, xMax + 1):
             for y in range(yMin, yMax + 1):
@@ -163,6 +163,30 @@ class Render(object):
                     continue
                 
                 z = A.z * w + B.z * u + C.z * v
+
+                try:
+                    if z > self.zbuffer[x][y]:
+                        self.point(x, y, selectColor)
+                        self.zbuffer[x][y] = z
+                except:
+                    pass
+
+    def triangle(self, A, B, C, color1, color2, color3):
+        xMin, xMax, yMin, yMax = bbox(A, B, C)
+        for x in range(xMin, xMax + 1):
+            for y in range(yMin, yMax + 1):
+                P = V2(x, y)
+                w, v, u = barycentric(A, B, C, P)
+                if w < 0 or v < 0 or u < 0:
+                    continue
+                
+                z = A.z * w + B.z * u + C.z * v
+
+                pColorR = round(color1[0] * w + color1[1] * u + color1[2] * v)
+                pColorG = round(color2[0] * w + color2[1] * u + color2[2] * v)
+                pColorB = round(color3[0] * w + color3[1] * u + color3[2] * v)
+
+                selectColor = color(pColorR, pColorG, pColorB)
 
                 try:
                     if z > self.zbuffer[x][y]:
@@ -207,9 +231,9 @@ class Render(object):
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
 
-                actualColor = self.shaders(A, intensity)
+                color1, color2, color3 = self.shaders(A, intensity)
 
-                self.triangle(A, B, C, actualColor)
+                self.triangle(A, B, C, color1, color2, color3)
                 
 
             else:
@@ -247,13 +271,13 @@ class Render(object):
                 normal = cross(sub(B, A), sub(C, A))
                 intensity = dot(norm(normal), light)
 
-                actualColor = self.shaders(A, intensity)
+                color1, color2, color3 = self.shaders(A, intensity)
                 
-                self.triangle(A, B, C, actualColor)
+                self.triangle(A, B, C, color1, color2, color3)
 
-                actualColor = self.shaders(C, intensity)
+                color1, color2, color3 = self.shaders(C, intensity)
 
-                self.triangle(A, D, C, actualColor)
+                self.triangle(A, D, C, color1, color2, color3)
 
     def write(self, filename='out.bmp'):
         f = open(filename, 'bw')
@@ -320,7 +344,8 @@ class Render(object):
         return x, y, selectColor, zColor
     '''
 
-    def shaders(self, A, intensity):
+    '''
+    def shaders2(self, A, intensity):
         d = random.randint(0, 50)
         grey = random.randint(120, 150)
         if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
@@ -346,3 +371,46 @@ class Render(object):
                 grey = 255
             selectColor = color(0, 0, grey)
         return selectColor
+    '''
+
+    def shaders(self, A, intensity):
+        d = random.randint(0, 50)
+        grey = random.randint(120, 150)
+        if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
+            color1 = color(72, 228, 210)
+            color2 = color(90, 227, 220)
+            color3 = color(103, 232, 230)
+        elif A.x > 450 + d and A.x < 600 - d and A.y >= 650 and A.y < 700 + d:
+            color1 = color(grey, 70, grey)
+            color2 = color(grey, 57, 170)
+            color3 = color(45, grey, 90)
+        elif A.x > 375 + d and A.x < 675 - d and A.y >= 500 - d and A.y < 650 + d:
+            color1 = color(70, 98, 100)
+            color2 = color(grey, grey, 112)
+            color3 = color(70, 75, 65)
+        elif A.x > 475 + d and A.x < 600 - d and A.y >= 450 - d and A.y < 500 + d:
+            color1 = color(94, 110, 60)
+            color2 = color(75, grey, 100)
+            color3 = color(65, 74, 50)
+        elif A.x > 490 + d and A.x < 510 - d and A.y >= 400 and A.y < 450:
+            color1 = color(120, 90, 80)
+            color2 = color(grey, 90, 100)
+            color3 = color(60, 70, 100)
+        elif A.x > 530 + d and A.x < 590 and A.y >= 350 and A.y < 450:
+            color1 = color(120, 90, 80)
+            color2 = color(grey, 90, 100)
+            color3 = color(60, 70, 100)
+        elif A.x > 550 + d and A.x < 580 and A.y >= 200 and A.y < 350:
+            color1 = color(120, 90, 80)
+            color2 = color(grey, 90, 100)
+            color3 = color(60, 70, 100)
+        else:
+            grey = round(255 * intensity)
+            if grey < 0:
+                grey = 0
+            elif grey > 255:
+                grey = 255
+            color1 = color(25, 27, 26)
+            color2 = color(34, 59, 66)
+            color3 = color(99, grey, 110)
+        return color1, color2, color3

@@ -74,4 +74,4 @@ glCreateWindow(1000, 1000)
 glClear()
 
 glLoad('./sphere.obj', V3(500, 500, 0), V3(500, 500, 200))
-glFinish('sphere.bmp')
+glFinish('sphere1.bmp')
