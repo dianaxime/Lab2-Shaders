@@ -381,57 +381,28 @@ class Render(object):
         return color1, color2, color3
 
     def nuevoShader(self, x, y):
-        # BROWN
-        COLOR_1 = 65, 60, 55 
-        # BROWN 2
-        COLOR_2 = 100, 60, 50
-        # ORANGE
-        COLOR_3 = 190, 65, 40
-        # MARRON
-        COLOR_4 = 165, 65, 75
-        # YELLOW
-        COLOR_5 = 220, 155, 65
+        COLOR_1 = 115, 80, 50
+        COLOR_4 = 165, 130, 100
         r1, g1, b1 = COLOR_1
-        r2, g2, b2, = COLOR_5
+        r2, g2, b2, = COLOR_4
 
         dc = 0
         
-        if y < 500 or y > 300:
-            r1, g1, b1 = COLOR_1
-            r2, g2, b2 = COLOR_4
-            if y <= 325:
-                dc = abs(y - 350)
-            else:
-                dc = abs(y - 450)
-        elif y >= 375 and y <= 425:
+        if y >= 375 and y <= 425:
             r1, g1, b1 = COLOR_1
             r2, g2, b2 = COLOR_4
             dc = abs(y - 400)
         elif y < 450 or y > 350:
-            r1, g1, b1 = COLOR_2
-            r2, g2, b2 = COLOR_3
-            dc = abs(y - 400)
-        elif y >= 450 or y <= 350:
-            r1, g1, b1 = COLOR_1
-            r2, g2, b2 = COLOR_5
-            if y >= 450:
-                dc = abs(y - 450)
-            else:
-                dc = abs(y - 350)
-        elif y >= 500 or y <= 300:
             r1, g1, b1 = COLOR_1
             r2, g2, b2 = COLOR_4
-            if y <= 300:
-                dc = abs(y - 300)
-            else:
-                dc = abs(y - 500)
+            dc = abs(y - 400)
         
         dc = dc / 50
         intensity = 0.5
         r = round(r1 + dc * (r2 - r1) * intensity)
         g = round(g1 + dc * (g2 - g1) * intensity)
         b = round(b1 + dc * (b2 - b1) * intensity)
-        print(x,y, r,g,b)
+        
         if intensity > 1:
             return color(255, 255, 255)
         elif intensity < 0:
