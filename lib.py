@@ -210,8 +210,6 @@ class Render(object):
     def load(self, filename, translate, scale):
         model = Obj(filename)
 
-        light = V3(-0.3, 0.7, 0.8)
-
         for face in model.faces:
             vcount = len(face)
 
