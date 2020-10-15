@@ -392,72 +392,46 @@ class Render(object):
         # YELLOW
         COLOR_5 = 220, 155, 65
         r1, g1, b1 = COLOR_1
-        r2, g2, b2, = COLOR_2
+        r2, g2, b2, = COLOR_5
 
         dc = 0
-        '''
-        if y >= 375 and y < 425:
+        
+        if y < 500 or y > 300:
+            r1, g1, b1 = COLOR_1
+            r2, g2, b2 = COLOR_4
+            if y <= 325:
+                dc = abs(y - 350)
+            else:
+                dc = abs(y - 450)
+        elif y >= 375 and y <= 425:
+            r1, g1, b1 = COLOR_1
+            r2, g2, b2 = COLOR_4
+            dc = abs(y - 400)
+        elif y < 450 or y > 350:
+            r1, g1, b1 = COLOR_2
+            r2, g2, b2 = COLOR_3
+            dc = abs(y - 400)
+        elif y >= 450 or y <= 350:
             r1, g1, b1 = COLOR_1
             r2, g2, b2 = COLOR_5
-            if y > 400:
-                dc = abs(y - 400)
-        elif y >= 425 and y < 475:
-            r1, g1, b1 = COLOR_5
-            r2, g2, b2 = COLOR_3
-            if y > 450:
+            if y >= 450:
                 dc = abs(y - 450)
-        elif y >= 475 and y < 525:
-            r1, g1, b1 = COLOR_3
+            else:
+                dc = abs(y - 350)
+        elif y >= 500 or y <= 300:
+            r1, g1, b1 = COLOR_1
             r2, g2, b2 = COLOR_4
-            if y > 500:
+            if y <= 300:
+                dc = abs(y - 300)
+            else:
                 dc = abs(y - 500)
-        elif y >= 500 and y < 550:
-            r1, g1, b1 = COLOR_4
-            r2, g2, b2 = COLOR_2
-            if y > 525:
-                dc = abs(y - 525)
-        '''
-
-        if y >= 375 and y <= 425:
-            r1, g1, b1 = COLOR_4
-            r2, g2, b2 = COLOR_1
-            dc = abs(y - 400)
-
-        if (y > 325 and y < 375) or (y > 425 and y < 475):
-            if y < 450 or y > 350:
-                r1, g1, b1 = COLOR_3
-                r2, g2, b2 = COLOR_2
-                dc = abs(y - 400)
-
-            if y >= 450 or y <= 350:
-                r1, g1, b1 = COLOR_1
-                r2, g2, b2 = COLOR_5
-                if y >= 450:
-                    dc = abs(y - 450)
-                else:
-                    dc = abs(y - 350)
-
-        if (y <= 325 and y >= 260) or (y <= 540 and y >= 475):
-            if y < 500 or y > 300:
-                r1, g1, b1 = COLOR_2
-                r2, g2, b2 = COLOR_3
-                if y <= 325:
-                    dc = abs(y - 350)
-                else:
-                    dc = abs(y - 450)
-
-            if y >= 500 or y <= 300:
-                r1, g1, b1 = COLOR_1
-                r2, g2, b2 = COLOR_4
-                if y <= 300:
-                    dc = abs(y - 300)
-                else:
-                    dc = abs(y - 500)
+        
         dc = dc / 50
         intensity = 0.5
         r = round(r1 + dc * (r2 - r1) * intensity)
         g = round(g1 + dc * (g2 - g1) * intensity)
         b = round(b1 + dc * (b2 - b1) * intensity)
+        print(x,y, r,g,b)
         if intensity > 1:
             return color(255, 255, 255)
         elif intensity < 0:
