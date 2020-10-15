@@ -20,6 +20,8 @@ WHITE = color(255, 255, 255)
 '''
     ****************************************
 '''
+
+
 class Render(object):
     def __init__(self):
         self.framebuffer = []
@@ -31,9 +33,9 @@ class Render(object):
         self.width = width
         self.height = height
 
-    def point(self, x, y, selectColor = None):
+    def point(self, x, y, selectColor=None):
         try:
-            self.framebuffer[y][x] = selectColor or  self.color
+            self.framebuffer[y][x] = selectColor or self.color
         except:
             pass
 
@@ -98,40 +100,40 @@ class Render(object):
         for x in range(x0, x1):
             if steep:
                 self.point(y, x)
-                
+
             else:
                 self.point(x, y)
-                
+
             offset += 2 * dy
             if offset >= threshold:
                 y += inc
                 threshold += 2 * dx
 
-    def triangle1(self, A, B, C, selectColor = None):
-        if A.y > B.y:
+    def triangle1(self, A, B, C, selectColor=None):
+        if y > B.y:
             A, B = B, A
-        if A.y > C.y:
+        if y > C.y:
             A, C = C, A
         if B.y > C.y:
             B, C = C, B
 
-        dx_ac = C.x - A.x
-        dy_ac = C.y - A.y
+        dx_ac = C.x - x
+        dy_ac = C.y - y
 
         if dy_ac == 0:
             return
 
         mi_ac = dx_ac/dy_ac
 
-        dx_ab = B.x - A.x
-        dy_ab = B.y - A.y
+        dx_ab = B.x - x
+        dy_ab = B.y - y
 
         if dy_ab != 0:
             mi_ab = dx_ab/dy_ab
 
-            for y in range(A.y, B.y + 1):
-                xi = round(A.x - mi_ac * (A.y - y))
-                xf = round(A.x - mi_ab * (A.y - y))
+            for y in range(y, B.y + 1):
+                xi = round(x - mi_ac * (y - y))
+                xf = round(x - mi_ab * (y - y))
 
                 if xi > xf:
                     xi, xf = xf, xi
@@ -146,7 +148,7 @@ class Render(object):
             mi_bc = dx_bc/dy_bc
 
             for y in range(B.y, C.y + 1):
-                xi = round(A.x - mi_ac * (A.y - y))
+                xi = round(x - mi_ac * (y - y))
                 xf = round(B.x - mi_bc * (B.y - y))
 
                 if xi > xf:
@@ -162,7 +164,7 @@ class Render(object):
                 w, v, u = barycentric(A, B, C, P)
                 if w < 0 or v < 0 or u < 0:
                     continue
-                
+
                 z = A.z * w + B.z * u + C.z * v
 
                 try:
@@ -172,7 +174,7 @@ class Render(object):
                 except:
                     pass
 
-    def triangle(self, A, B, C, color1, color2, color3):
+    def triangle(self, A, B, C):
         xMin, xMax, yMin, yMax = bbox(A, B, C)
         for x in range(xMin, xMax + 1):
             for y in range(yMin, yMax + 1):
@@ -180,14 +182,23 @@ class Render(object):
                 w, v, u = barycentric(A, B, C, P)
                 if w < 0 or v < 0 or u < 0:
                     continue
-                
+
                 z = A.z * w + B.z * u + C.z * v
+
+                '''
+                if self.activeShader == 'TIERRA':
+                    color1, color2, color3 = self.shadersTierra(x, y, intensity)
+                else:
+                    color1, color2, color3 = self.shadersLuna(x, y, intensity)
 
                 pColorR = round(color1[0] * w + color1[1] * u + color1[2] * v)
                 pColorG = round(color2[0] * w + color2[1] * u + color2[2] * v)
                 pColorB = round(color3[0] * w + color3[1] * u + color3[2] * v)
 
                 selectColor = color(pColorR, pColorG, pColorB)
+                '''
+
+                selectColor = self.nuevoShader(x, y)
 
                 try:
                     if z > self.zbuffer[x][y]:
@@ -195,12 +206,12 @@ class Render(object):
                         self.zbuffer[x][y] = z
                 except:
                     pass
-                
+
     def load(self, filename, translate, scale):
         model = Obj(filename)
 
         light = V3(-0.3, 0.7, 0.8)
-        
+
         for face in model.faces:
             vcount = len(face)
 
@@ -209,9 +220,12 @@ class Render(object):
                 f2 = face[1][0] - 1
                 f3 = face[2][0] - 1
 
-                v1 = V3(model.vertices[f1][0], model.vertices[f1][1], model.vertices[f1][2])
-                v2 = V3(model.vertices[f2][0], model.vertices[f2][1], model.vertices[f2][2])
-                v3 = V3(model.vertices[f3][0], model.vertices[f3][1], model.vertices[f3][2])
+                v1 = V3(model.vertices[f1][0],
+                        model.vertices[f1][1], model.vertices[f1][2])
+                v2 = V3(model.vertices[f2][0],
+                        model.vertices[f2][1], model.vertices[f2][2])
+                v3 = V3(model.vertices[f3][0],
+                        model.vertices[f3][1], model.vertices[f3][2])
 
                 x1 = round((v1.x * scale.x) + translate.x)
                 y1 = round((v1.y * scale.y) + translate.y)
@@ -229,27 +243,22 @@ class Render(object):
                 B = V3(x2, y2, z2)
                 C = V3(x3, y3, z3)
 
-                normal = cross(sub(B, A), sub(C, A))
-                intensity = dot(norm(normal), light)
-
-                if self.activeShader == 'TIERRA':
-                    color1, color2, color3 = self.shadersTierra(A, intensity)
-                else:
-                    color1, color2, color3 = self.shadersLuna(A, intensity)
-
-                self.triangle(A, B, C, color1, color2, color3)
-                
+                self.triangle(A, B, C)
 
             else:
                 f1 = face[0][0] - 1
                 f2 = face[1][0] - 1
                 f3 = face[2][0] - 1
-                f4 = face[3][0] - 1   
+                f4 = face[3][0] - 1
 
-                v1 = V3(model.vertices[f1][0], model.vertices[f1][1], model.vertices[f1][2])
-                v2 = V3(model.vertices[f2][0], model.vertices[f2][1], model.vertices[f2][2])
-                v3 = V3(model.vertices[f3][0], model.vertices[f3][1], model.vertices[f3][2])
-                v4 = V3(model.vertices[f4][0], model.vertices[f4][1], model.vertices[f4][2])
+                v1 = V3(model.vertices[f1][0],
+                        model.vertices[f1][1], model.vertices[f1][2])
+                v2 = V3(model.vertices[f2][0],
+                        model.vertices[f2][1], model.vertices[f2][2])
+                v3 = V3(model.vertices[f3][0],
+                        model.vertices[f3][1], model.vertices[f3][2])
+                v4 = V3(model.vertices[f4][0],
+                        model.vertices[f4][1], model.vertices[f4][2])
 
                 x1 = round((v1.x * scale.x) + translate.x)
                 y1 = round((v1.y * scale.y) + translate.y)
@@ -272,23 +281,9 @@ class Render(object):
                 C = V3(x3, y3, z3)
                 D = V3(x4, y4, z4)
 
-                normal = cross(sub(B, A), sub(C, A))
-                intensity = dot(norm(normal), light)
+                self.triangle(A, B, C)
 
-
-                if self.activeShader == 'TIERRA':
-                    color1, color2, color3 = self.shadersTierra(A, intensity)
-                else:
-                    color1, color2, color3 = self.shadersLuna(A, intensity)
-                
-                self.triangle(A, B, C, color1, color2, color3)
-
-                if self.activeShader == 'TIERRA':
-                    color1, color2, color3 = self.shadersTierra(A, intensity)
-                else:
-                    color1, color2, color3 = self.shadersLuna(A, intensity)
-
-                self.triangle(A, D, C, color1, color2, color3)
+                self.triangle(A, D, C)
 
     def write(self, filename='out.bmp'):
         f = open(filename, 'bw')
@@ -319,34 +314,34 @@ class Render(object):
 
         f.close()
 
-    def shadersTierra(self, A, intensity):
+    def shadersTierra(self, x, y, intensity):
         d = random.randint(0, 50)
         grey = random.randint(120, 150)
-        if A.x > 400 and A.x < 600 and A.y >= 720 and A.y < 800:
+        if x > 400 and x < 600 and y >= 720 and y < 800:
             color1 = color(72, 228, 210)
             color2 = color(90, 227, 220)
             color3 = color(103, 232, 230)
-        elif A.x > 450 + d and A.x < 600 - d and A.y >= 650 and A.y < 700 + d:
+        elif x > 450 + d and x < 600 - d and y >= 650 and y < 700 + d:
             color1 = color(grey, 70, grey)
             color2 = color(grey, 57, 170)
             color3 = color(45, grey, 90)
-        elif A.x > 375 + d and A.x < 675 - d and A.y >= 500 - d and A.y < 650 + d:
+        elif x > 375 + d and x < 675 - d and y >= 500 - d and y < 650 + d:
             color1 = color(70, 98, 100)
             color2 = color(grey, grey, 112)
             color3 = color(70, 75, 65)
-        elif A.x > 475 + d and A.x < 600 - d and A.y >= 450 - d and A.y < 500 + d:
+        elif x > 475 + d and x < 600 - d and y >= 450 - d and y < 500 + d:
             color1 = color(94, 110, 60)
             color2 = color(75, grey, 100)
             color3 = color(65, 74, 50)
-        elif A.x > 490 + d and A.x < 510 - d and A.y >= 400 and A.y < 450:
+        elif x > 490 + d and x < 510 - d and y >= 400 and y < 450:
             color1 = color(120, 90, 80)
             color2 = color(grey, 90, 100)
             color3 = color(60, 70, 100)
-        elif A.x > 530 + d and A.x < 590 and A.y >= 350 and A.y < 450:
+        elif x > 530 + d and x < 590 and y >= 350 and y < 450:
             color1 = color(120, 90, 80)
             color2 = color(grey, 90, 100)
             color3 = color(60, 70, 100)
-        elif A.x > 550 + d and A.x < 580 and A.y >= 200 and A.y < 350:
+        elif x > 550 + d and x < 580 and y >= 200 and y < 350:
             color1 = color(120, 90, 80)
             color2 = color(grey, 90, 100)
             color3 = color(60, 70, 100)
@@ -361,21 +356,21 @@ class Render(object):
             color3 = color(99, grey, 110)
         return color1, color2, color3
 
-    def shadersLuna(self, A, intensity):
+    def shadersLuna(self, x, y, intensity):
         d = random.randint(0, 100)
-        if A.x > 100 + d and A.x < 600 - d and A.y >= 325 + d and A.y < 700 - d:
+        if x > 100 + d and x < 600 - d and y >= 325 + d and y < 700 - d:
             color1 = color(34, 72, 140)
             color2 = color(34, 72, 140)
             color3 = color(34, 72, 140)
-        elif A.x > 600 - d and A.x < 800 - d and A.y >= 600 - d and A.y < 800 - d:
+        elif x > 600 - d and x < 800 - d and y >= 600 - d and y < 800 - d:
             color1 = color(34, 72, 140)
             color2 = color(34, 72, 140)
             color3 = color(34, 72, 140)
-        elif A.x > 100 + d and A.x < 800 - d and A.y >= 700 and A.y < 800:
+        elif x > 100 + d and x < 800 - d and y >= 700 and y < 800:
             color1 = color(72, 228, 210)
             color2 = color(90, 227, 220)
             color3 = color(103, 232, 230)
-        elif A.x > 100 and A.x < 800 and A.y >= 0 and A.y < 275 + d:
+        elif x > 100 and x < 800 and y >= 0 and y < 275 + d:
             color1 = color(72, 228, 210)
             color2 = color(90, 227, 220)
             color3 = color(103, 232, 230)
@@ -384,3 +379,88 @@ class Render(object):
             color2 = color(125, 195, 95)
             color3 = color(125, 195, 95)
         return color1, color2, color3
+
+    def nuevoShader(self, x, y):
+        # BROWN
+        COLOR_1 = 65, 60, 55 
+        # BROWN 2
+        COLOR_2 = 100, 60, 50
+        # ORANGE
+        COLOR_3 = 190, 65, 40
+        # MARRON
+        COLOR_4 = 165, 65, 75
+        # YELLOW
+        COLOR_5 = 220, 155, 65
+        r1, g1, b1 = COLOR_1
+        r2, g2, b2, = COLOR_2
+
+        dc = 0
+        '''
+        if y >= 375 and y < 425:
+            r1, g1, b1 = COLOR_1
+            r2, g2, b2 = COLOR_5
+            if y > 400:
+                dc = abs(y - 400)
+        elif y >= 425 and y < 475:
+            r1, g1, b1 = COLOR_5
+            r2, g2, b2 = COLOR_3
+            if y > 450:
+                dc = abs(y - 450)
+        elif y >= 475 and y < 525:
+            r1, g1, b1 = COLOR_3
+            r2, g2, b2 = COLOR_4
+            if y > 500:
+                dc = abs(y - 500)
+        elif y >= 500 and y < 550:
+            r1, g1, b1 = COLOR_4
+            r2, g2, b2 = COLOR_2
+            if y > 525:
+                dc = abs(y - 525)
+        '''
+
+        if y >= 375 and y <= 425:
+            r1, g1, b1 = COLOR_4
+            r2, g2, b2 = COLOR_1
+            dc = abs(y - 400)
+
+        if (y > 325 and y < 375) or (y > 425 and y < 475):
+            if y < 450 or y > 350:
+                r1, g1, b1 = COLOR_3
+                r2, g2, b2 = COLOR_2
+                dc = abs(y - 400)
+
+            if y >= 450 or y <= 350:
+                r1, g1, b1 = COLOR_1
+                r2, g2, b2 = COLOR_5
+                if y >= 450:
+                    dc = abs(y - 450)
+                else:
+                    dc = abs(y - 350)
+
+        if (y <= 325 and y >= 260) or (y <= 540 and y >= 475):
+            if y < 500 or y > 300:
+                r1, g1, b1 = COLOR_2
+                r2, g2, b2 = COLOR_3
+                if y <= 325:
+                    dc = abs(y - 350)
+                else:
+                    dc = abs(y - 450)
+
+            if y >= 500 or y <= 300:
+                r1, g1, b1 = COLOR_1
+                r2, g2, b2 = COLOR_4
+                if y <= 300:
+                    dc = abs(y - 300)
+                else:
+                    dc = abs(y - 500)
+        dc = dc / 50
+        intensity = 0.5
+        r = round(r1 + dc * (r2 - r1) * intensity)
+        g = round(g1 + dc * (g2 - g1) * intensity)
+        b = round(b1 + dc * (b2 - b1) * intensity)
+        if intensity > 1:
+            return color(255, 255, 255)
+        elif intensity < 0:
+            return color(0, 0, 0)
+        else:
+            return color(r, g, b)
