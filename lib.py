@@ -312,75 +312,15 @@ class Render(object):
 
         f.close()
 
-    def shadersTierra(self, x, y, intensity):
-        d = random.randint(0, 50)
-        grey = random.randint(120, 150)
-        if x > 400 and x < 600 and y >= 720 and y < 800:
-            color1 = color(72, 228, 210)
-            color2 = color(90, 227, 220)
-            color3 = color(103, 232, 230)
-        elif x > 450 + d and x < 600 - d and y >= 650 and y < 700 + d:
-            color1 = color(grey, 70, grey)
-            color2 = color(grey, 57, 170)
-            color3 = color(45, grey, 90)
-        elif x > 375 + d and x < 675 - d and y >= 500 - d and y < 650 + d:
-            color1 = color(70, 98, 100)
-            color2 = color(grey, grey, 112)
-            color3 = color(70, 75, 65)
-        elif x > 475 + d and x < 600 - d and y >= 450 - d and y < 500 + d:
-            color1 = color(94, 110, 60)
-            color2 = color(75, grey, 100)
-            color3 = color(65, 74, 50)
-        elif x > 490 + d and x < 510 - d and y >= 400 and y < 450:
-            color1 = color(120, 90, 80)
-            color2 = color(grey, 90, 100)
-            color3 = color(60, 70, 100)
-        elif x > 530 + d and x < 590 and y >= 350 and y < 450:
-            color1 = color(120, 90, 80)
-            color2 = color(grey, 90, 100)
-            color3 = color(60, 70, 100)
-        elif x > 550 + d and x < 580 and y >= 200 and y < 350:
-            color1 = color(120, 90, 80)
-            color2 = color(grey, 90, 100)
-            color3 = color(60, 70, 100)
-        else:
-            grey = round(255 * intensity)
-            if grey < 0:
-                grey = 0
-            elif grey > 255:
-                grey = 255
-            color1 = color(25, 27, 26)
-            color2 = color(34, 59, 66)
-            color3 = color(99, grey, 110)
-        return color1, color2, color3
-
-    def shadersLuna(self, x, y, intensity):
-        d = random.randint(0, 100)
-        if x > 100 + d and x < 600 - d and y >= 325 + d and y < 700 - d:
-            color1 = color(34, 72, 140)
-            color2 = color(34, 72, 140)
-            color3 = color(34, 72, 140)
-        elif x > 600 - d and x < 800 - d and y >= 600 - d and y < 800 - d:
-            color1 = color(34, 72, 140)
-            color2 = color(34, 72, 140)
-            color3 = color(34, 72, 140)
-        elif x > 100 + d and x < 800 - d and y >= 700 and y < 800:
-            color1 = color(72, 228, 210)
-            color2 = color(90, 227, 220)
-            color3 = color(103, 232, 230)
-        elif x > 100 and x < 800 and y >= 0 and y < 275 + d:
-            color1 = color(72, 228, 210)
-            color2 = color(90, 227, 220)
-            color3 = color(103, 232, 230)
-        else:
-            color1 = color(125, 195, 95)
-            color2 = color(125, 195, 95)
-            color3 = color(125, 195, 95)
-        return color1, color2, color3
-
     def nuevoShader(self, x, y):
         COLOR_1 = 115, 80, 50
         COLOR_4 = 165, 130, 100
+        intensity = 0.5
+        if self.activeShader == 'LUNA':
+            COLOR_1 = 80, 60, 50
+            COLOR_4 = 124, 115, 95
+            intensity = 0.3
+
         r1, g1, b1 = COLOR_1
         r2, g2, b2, = COLOR_4
 
@@ -396,7 +336,6 @@ class Render(object):
             dc = abs(y - 400)
         
         dc = dc / 50
-        intensity = 0.5
         r = round(r1 + dc * (r2 - r1) * intensity)
         g = round(g1 + dc * (g2 - g1) * intensity)
         b = round(b1 + dc * (b2 - b1) * intensity)
